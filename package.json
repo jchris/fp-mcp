@@ -17,6 +17,7 @@
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "dependencies": {
+    "@fireproof/core": "^0.19.114",
     "@modelcontextprotocol/sdk": "0.6.0"
   },
   "devDependencies": {

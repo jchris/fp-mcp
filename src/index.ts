@@ -19,7 +19,7 @@ import {
   ListPromptsRequestSchema,
   GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-
+import { fireproof } from "@fireproof/core";
 /**
  * Type alias for a note object.
  */
@@ -29,10 +29,10 @@ type Note = { title: string, content: string };
  * Simple in-memory storage for notes.
  * In a real implementation, this would likely be backed by a database.
  */
-const notes: { [id: string]: Note } = {
-  "1": { title: "First Note", content: "This is note 1" },
-  "2": { title: "Second Note", content: "This is note 2" }
-};
+const notesDb = fireproof("notes");
+
+await notesDb.put({ title: "First Note", content: "This is note 1" });
+await notesDb.put({ title: "Second Note", content: "This is note 2" });
 
 /**
  * Create an MCP server with capabilities for resources (to list/read notes),
@@ -60,8 +60,9 @@ const server = new Server(
  * - Human readable name and description (now including the note title)
  */
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
+  const notes = await notesDb.query<string, Note>('_id');
   return {
-    resources: Object.entries(notes).map(([id, note]) => ({
+    resources: notes.rows.map(({id, value:note} ) => ({
       uri: `note:///${id}`,
       mimeType: "text/plain",
       name: note.title,
